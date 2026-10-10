@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-
+import '../styles/Auth.css'
 function Register() {
   return (
     <div className="auth-page">

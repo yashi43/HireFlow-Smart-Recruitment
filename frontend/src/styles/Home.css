@@ -1,0 +1,240 @@
+.home {
+  min-height: calc(100vh - 72px);
+}
+.hero-section {
+  min-height: 570px;
+  padding: 80px 7%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 60px;
+  background: linear-gradient(135deg, #f8faff 0%, #eef3ff 100%);
+}
+
+.hero-content {
+  max-width: 620px;
+}
+
+.hero-tag {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: #4169e1;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.hero-content h1 {
+  margin-bottom: 24px;
+  color: #172033;
+  font-size: 58px;
+  line-height: 1.08;
+  letter-spacing: -2px;
+}
+
+.hero-content h1 span {
+  color: #4169e1;
+}
+
+.hero-text {
+  max-width: 540px;
+  margin-bottom: 34px;
+  color: #647089;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.primary-btn,
+.secondary-btn {
+  padding: 14px 25px;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.primary-btn {
+  background: #4169e1;
+  color: #ffffff;
+}
+
+.primary-btn:hover,
+.auth-submit:hover {
+  background: #3155c5;
+}
+
+.secondary-btn {
+  background: #ffffff;
+  color: #172033;
+  border: 1px solid #dce2ec;
+}
+
+/* HIRING OVERVIEW CARD */
+
+.hero-card {
+  width: 380px;
+  flex-shrink: 0;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #e2e7f0;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(50, 70, 110, 0.12);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 35px;
+  color: #536078;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.live {
+  color: #20a464;
+  font-size: 12px;
+}
+
+.stat-main h2 {
+  margin-bottom: 6px;
+  font-size: 42px;
+}
+
+.stat-main p {
+  margin-bottom: 35px;
+  color: #7a8498;
+}
+
+.mini-stats {
+  display: flex;
+  gap: 15px;
+}
+
+.mini-stats div {
+  flex: 1;
+  padding: 18px;
+  background: #f7f9fc;
+  border-radius: 12px;
+}
+
+.mini-stats strong,
+.mini-stats span {
+  display: block;
+}
+
+.mini-stats strong {
+  margin-bottom: 6px;
+  font-size: 21px;
+}
+
+.mini-stats span {
+  color: #7a8498;
+  font-size: 12px;
+}
+
+/* FEATURES SECTION */
+
+.features {
+  padding: 65px 7%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 25px;
+  background: #ffffff;
+}
+
+.feature {
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #e7ebf2;
+  border-radius: 14px;
+}
+
+.feature-icon {
+  width: 45px;
+  height: 45px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef3ff;
+  color: #4169e1;
+  border-radius: 10px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.feature h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.feature p {
+  color: #6b7589;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* RESPONSIVE HOME PAGE */
+
+@media (max-width: 900px) {
+  .hero-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-content h1 {
+    font-size: 45px;
+  }
+
+  .hero-card {
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .hero-section {
+    padding: 55px 5%;
+  }
+
+  .hero-content h1 {
+    font-size: 38px;
+  }
+
+  .hero-text {
+    font-size: 16px;
+  }
+
+  .features {
+    padding: 45px 5%;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-buttons {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-card {
+    padding: 22px;
+  }
+
+  .mini-stats {
+    gap: 10px;
+  }
+
+  .mini-stats div {
+    padding: 13px;
+  }
+}
