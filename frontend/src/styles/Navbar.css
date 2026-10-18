@@ -1,80 +1,192 @@
-.navbar,
-.jobs-header {
-  height: 72px;
+.navbar {
+  width: 100%;
+  min-height: 76px;
   padding: 0 7%;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 32px;
   background: #ffffff;
   border-bottom: 1px solid #e9edf3;
+  box-sizing: border-box;
 }
 
-.logo {
+/* Logo */
+
+.navbar-logo {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  text-decoration: none;
+  color: #172033;
   font-size: 27px;
   font-weight: 800;
-  color: #172033;
+  white-space: nowrap;
 }
 
-.logo span {
+.navbar-logo span {
   color: #4169e1;
 }
 
-.nav-links,
-.jobs-header nav {
+/* Home and Find Jobs */
+
+.navbar-links {
   display: flex;
   align-items: center;
-  gap: 28px;
+  justify-content: center;
+  gap: 36px;
+  flex: 1;
+  min-width: 0;
 }
 
-.nav-links a,
-.jobs-header nav a {
+.navbar-links a {
+  display: inline-block;
   color: #536078;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease;
 }
 
-.nav-links a:hover,
-.jobs-header nav a:hover {
+.navbar-links a:hover {
   color: #4169e1;
 }
 
-.login-btn {
+/* Login and Sign Up */
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.navbar-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.navbar-actions a:hover {
+  color: #4169e1;
+}
+
+/* Sign Up button */
+
+.navbar-actions a[href="/register"] {
+  padding: 11px 20px;
+  background: #4169e1;
+  color: #ffffff;
+  border-radius: 8px;
+}
+
+.navbar-actions a[href="/register"]:hover {
+  background: #3154c7;
+}
+
+/* Logged-in username */
+
+.navbar-user {
+  color: #475569;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* Logout button */
+
+.navbar-actions button {
   padding: 10px 18px;
   border: 1px solid #dce2ec;
   border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
-.signup-btn {
-  padding: 11px 20px;
-  background: #4169e1;
-  color: #ffffff !important;
-  border-radius: 8px;
+.navbar-actions button:hover {
+  background: #f5f7ff;
+  color: #4169e1;
 }
 
-@media (max-width: 760px) {
-  .navbar,
-  .jobs-header {
-    padding: 0 5%;
+/* Tablet */
+
+@media (max-width: 900px) {
+  .navbar {
+    padding: 0 4%;
+    gap: 22px;
   }
 
-  .nav-links,
-  .jobs-header nav {
-    gap: 12px;
+  .navbar-links {
+    gap: 24px;
+  }
+
+  .navbar-actions {
+    gap: 14px;
   }
 }
+
+/* Mobile */
 
 @media (max-width: 600px) {
-  .nav-links a:not(.login-btn):not(.signup-btn) {
-    display: none;
+  .navbar {
+    min-height: 70px;
+    height: auto;
+    padding: 14px 5%;
+    flex-wrap: wrap;
+    row-gap: 16px;
+  }
+
+  .navbar-logo {
+    font-size: 24px;
+  }
+
+  .navbar-links {
+    order: 3;
+    flex: 0 0 100%;
+    justify-content: flex-start;
+    gap: 28px;
+    padding-top: 12px;
+    border-top: 1px solid #e9edf3;
+  }
+
+  .navbar-actions {
+    gap: 12px;
+  }
+
+  .navbar-actions a,
+  .navbar-actions button {
+    font-size: 13px;
+  }
+
+  .navbar-actions a[href="/register"] {
+    padding: 9px 13px;
   }
 }
 
-@media (max-width: 480px) {
-  .jobs-header nav {
-    gap: 10px;
+@media (max-width: 380px) {
+  .navbar {
+    gap: 12px;
   }
 
-  .jobs-header nav a {
-    font-size: 12px;
+  .navbar-logo {
+    font-size: 22px;
+  }
+
+  .navbar-actions {
+    gap: 9px;
+  }
+
+  .navbar-links {
+    gap: 22px;
   }
 }

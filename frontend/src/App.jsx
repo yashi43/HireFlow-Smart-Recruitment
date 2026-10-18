@@ -1,9 +1,11 @@
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Jobs from './pages/Jobs'
+import RecruiterDashboard from './pages/RecruiterDashboard'
 
 function App() {
   return (
@@ -13,6 +15,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/jobs" element={<Jobs />} />
+        <Route path="/recruiter" element={<RecruiterDashboard />} />
       </Routes>
     </BrowserRouter>
   )

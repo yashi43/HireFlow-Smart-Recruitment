@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
@@ -29,28 +30,31 @@ function Login() {
       }
 
       localStorage.setItem(
-  'user',
-  JSON.stringify({
-    username: data.username,
-    email: data.email,
-    role: data.role,
-  })
-)
+        'user',
+        JSON.stringify({
+          username: data.username,
+          email: data.email,
+          role: data.role,
+        })
+      )
 
-      navigate('/jobs')
+      if (data.role === 'recruiter') {
+        navigate('/recruiter')
+      } else {
+        navigate('/jobs')
+      }
     } catch (err) {
       const data = err.response?.data
 
-setError(
-  typeof data === 'string'
-    ? data
-    : data
-      ? Object.values(data)
-          .flat()
-          .join(' ')
-      : 'Unable to connect to the server. Please try again.'
-)
-      console.error('Login error:', err.response?.data || err.message)
+      setError(
+        typeof data === 'string'
+          ? data
+          : data
+            ? Object.values(data).flat().join(' ')
+            : 'Unable to connect to the server. Please try again.'
+      )
+
+      console.error('Login error:', data || err.message)
     } finally {
       setLoading(false)
     }
