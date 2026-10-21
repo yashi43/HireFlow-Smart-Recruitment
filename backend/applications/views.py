@@ -1,9 +1,8 @@
-
-from django.shortcuts import get_object_or_404
+import django.shortcuts
 
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import Application
 from .serializers import (
@@ -17,9 +16,18 @@ from jobs.models import Job
 class ApplyJobView(generics.CreateAPIView):
     serializer_class = ApplicationSerializer
     permission_classes = [IsCandidate]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["job"] = django.shortcuts.get_object_or_404(
+            Job,
+            id=self.kwargs["job_id"],
+        )
+        return context
 
     def perform_create(self, serializer):
-        job = get_object_or_404(
+        job = django.shortcuts.get_object_or_404(
             Job,
             id=self.kwargs["job_id"],
         )

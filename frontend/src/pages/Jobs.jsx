@@ -23,10 +23,7 @@ function Jobs() {
   const [location, setLocation] = useState('All locations')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [applyMessages, setApplyMessages] = useState({})
-  const [applyingJobId, setApplyingJobId] = useState(null)
-
-  const [currentUser, setCurrentUser] = useState(getStoredUser)
+const [currentUser, setCurrentUser] = useState(getStoredUser)
 
   const token = localStorage.getItem('token')
   const isLoggedIn = Boolean(token && currentUser)
@@ -34,8 +31,7 @@ function Jobs() {
   useEffect(() => {
     let cancelled = false
 
-    axios
-      .get(`${API_URL}/jobs/`)
+    axios.get(`${API_URL}/jobs/`)
       .then((response) => {
         const data = response.data
         if (!cancelled) {
@@ -45,9 +41,7 @@ function Jobs() {
       .catch((err) => {
         console.error('Error fetching jobs:', err)
         if (!cancelled) {
-          setError(
-            'Could not load jobs. Please check that the backend is running.'
-          )
+          setError('Could not load jobs. Please check that the backend is running.')
         }
       })
       .finally(() => {
@@ -63,10 +57,10 @@ function Jobs() {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     setCurrentUser(null)
-    setApplyMessages({})
+    navigate('/login')
   }
 
-  const handleApply = async (jobId) => {
+  const handleApply = (jobId) => {
     const savedToken = localStorage.getItem('token')
     const savedUser = getStoredUser()
 
@@ -78,80 +72,11 @@ function Jobs() {
     setCurrentUser(savedUser)
 
     if (savedUser.role !== 'candidate') {
-      setApplyMessages((previous) => ({
-        ...previous,
-        [jobId]: {
-          type: 'error',
-          text: 'Only candidate accounts can apply for jobs.',
-        },
-      }))
+      alert('Only candidate accounts can apply for jobs.')
       return
     }
 
-    setApplyingJobId(jobId)
-    setApplyMessages((previous) => ({
-      ...previous,
-      [jobId]: null,
-    }))
-
-    try {
-      await axios.post(
-        `${API_URL}/jobs/${jobId}/apply/`,
-        { job: jobId },
-        {
-          headers: {
-            Authorization: `Token ${savedToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      )
-
-      setApplyMessages((previous) => ({
-        ...previous,
-        [jobId]: {
-          type: 'success',
-          text: 'Application submitted successfully!',
-        },
-      }))
-    } catch (err) {
-      console.error('Application error:', err.response?.data || err.message)
-
-      const data = err.response?.data
-      let message = 'Could not submit your application. Please try again.'
-
-      if (err.response?.status === 401) {
-        message = 'Your login session is invalid. Please log in again.'
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        setCurrentUser(null)
-      } else if (data) {
-        if (typeof data === 'string') {
-          message = data
-        } else {
-          message = Object.entries(data)
-            .map(([key, value]) => {
-              const detail = Array.isArray(value)
-                ? value.join(', ')
-                : typeof value === 'object'
-                  ? JSON.stringify(value)
-                  : String(value)
-
-              return `${key}: ${detail}`
-            })
-            .join(' | ')
-        }
-      }
-
-      setApplyMessages((previous) => ({
-        ...previous,
-        [jobId]: {
-          type: 'error',
-          text: message,
-        },
-      }))
-    } finally {
-      setApplyingJobId(null)
-    }
+    navigate(`/apply/${jobId}`)
   }
 
   const locations = [
@@ -160,14 +85,12 @@ function Jobs() {
 
   const filteredJobs = jobs.filter((job) => {
     const searchableText =
-      `${job.title || ''} ${job.company || ''} ${job.skills_required || ''}`
-        .toLowerCase()
+      `${job.title || ''} ${job.company || ''} ${job.skills_required || ''}`.toLowerCase()
 
-    const matchesSearch = searchableText.includes(search.toLowerCase())
-    const matchesLocation =
-      location === 'All locations' || job.location === location
-
-    return matchesSearch && matchesLocation
+    return (
+      searchableText.includes(search.toLowerCase()) &&
+      (location === 'All locations' || job.location === location)
+    )
   })
 
   return (
@@ -183,16 +106,12 @@ function Jobs() {
           {isLoggedIn ? (
             <>
               <span>Hi, {currentUser.username}</span>
-              <button type="button" onClick={handleLogout}>
-                Logout
-              </button>
+              <button type="button" onClick={handleLogout}>Logout</button>
             </>
           ) : (
             <>
               <Link to="/login">Login</Link>
-              <Link to="/register" className="signup-btn">
-                Sign Up
-              </Link>
+              <Link to="/register" className="signup-btn">Sign Up</Link>
             </>
           )}
         </nav>
@@ -211,18 +130,16 @@ function Jobs() {
             type="text"
             placeholder="Job title, company or skill"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
           />
 
           <select
             value={location}
-            onChange={(event) => setLocation(event.target.value)}
+            onChange={(e) => setLocation(e.target.value)}
           >
             <option value="All locations">All locations</option>
             {locations.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
+              <option key={item} value={item}>{item}</option>
             ))}
           </select>
         </div>
@@ -235,9 +152,7 @@ function Jobs() {
             <p>Find the role that matches your career goals.</p>
           </div>
 
-          {!loading && !error && (
-            <span>{filteredJobs.length} jobs found</span>
-          )}
+          {!loading && !error && <span>{filteredJobs.length} jobs found</span>}
         </div>
 
         {loading && <p>Loading jobs...</p>}
@@ -251,15 +166,12 @@ function Jobs() {
                 .map((skill) => skill.trim())
                 .filter(Boolean)
 
-              const message = applyMessages[job.id]
-
-              return (
+            return (
                 <article className="job-card" key={job.id}>
                   <div className="job-card-top">
                     <div className="company-avatar">
                       {(job.company || 'C').charAt(0)}
-                    </div>
-
+                  </div>
                     <span className="job-type">
                       {job.experience || 'Experience not specified'}
                     </span>
@@ -291,29 +203,11 @@ function Jobs() {
                       type="button"
                       className="job-details-btn"
                       onClick={() => handleApply(job.id)}
-                      disabled={applyingJobId === job.id}
-                    >
-                      {applyingJobId === job.id
-                        ? 'Applying...'
-                        : isLoggedIn
-                          ? 'Apply Now →'
-                          : 'Login to Apply →'}
+                  >
+                      {isLoggedIn ? 'Apply Now →' : 'Login to Apply →'}
                     </button>
                   </div>
-
-                  {message && (
-                    <p
-                      role="status"
-                      style={{
-                        marginTop: '12px',
-                        color:
-                          message.type === 'success' ? 'green' : 'crimson',
-                      }}
-                    >
-                      {message.text}
-                    </p>
-                  )}
-                </article>
+                 </article>
               )
             })}
           </div>
