@@ -85,3 +85,33 @@ class ApplicationStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = ["status"]
+
+        
+from .models import SavedJob
+
+
+class SavedJobSerializer(serializers.ModelSerializer):
+    job_title = serializers.CharField(
+        source="job.title",
+        read_only=True,
+    )
+
+    class Meta:
+        model = SavedJob
+        fields = ["id", "job", "job_title", "saved_at"]
+        read_only_fields = ["id", "saved_at"]
+
+    def validate(self, data):
+        request = self.context.get("request")
+        job = data.get("job")
+
+        if request and job and SavedJob.objects.filter(
+            candidate=request.user,
+            job=job,
+        ).exists():
+            raise serializers.ValidationError(
+                {"job": "This job is already saved."}
+            )
+
+        return data
+

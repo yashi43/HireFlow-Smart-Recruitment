@@ -1,3 +1,4 @@
+
 from django.db import models
 from django.core.validators import FileExtensionValidator
 
@@ -46,6 +47,9 @@ class Application(models.Model):
         default=Status.APPLIED
     )
 
+    # Number of interview rounds completed
+    interview_rounds = models.PositiveSmallIntegerField(default=0)
+
     applied_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -58,3 +62,32 @@ class Application(models.Model):
 
     def __str__(self):
         return f"{self.candidate.username} - {self.job.title}"
+
+
+class SavedJob(models.Model):
+
+    candidate = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="saved_jobs",
+    )
+
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE,
+        related_name="saved_by_candidates",
+    )
+
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["candidate", "job"],
+                name="unique_candidate_saved_job",
+            )
+        ]
+        ordering = ["-saved_at"]
+
+    def __str__(self):
+        return f"{self.candidate.username} saved {self.job.title}"

@@ -42,6 +42,7 @@ function RecruiterDashboard() {
   const token = localStorage.getItem('token')
 
   let user = null
+
   try {
     user = JSON.parse(localStorage.getItem('user'))
   } catch {
@@ -80,7 +81,10 @@ function RecruiterDashboard() {
       }
 
       const data = await response.json()
-      setApplications(Array.isArray(data) ? data : data.results || [])
+
+      setApplications(
+        Array.isArray(data) ? data : data.results || []
+      )
     } catch (err) {
       setApplicationsError(err.message)
     } finally {
@@ -103,11 +107,16 @@ function RecruiterDashboard() {
 
   function handleChange(event) {
     const { name, value } = event.target
-    setForm(previous => ({ ...previous, [name]: value }))
+
+    setForm(previous => ({
+      ...previous,
+      [name]: value,
+    }))
   }
 
   async function handleSubmit(event) {
     event.preventDefault()
+
     setSaving(true)
     setError('')
     setMessage('')
@@ -126,7 +135,8 @@ function RecruiterDashboard() {
 
       if (!response.ok) {
         throw new Error(
-          Object.values(data).flat().join(' ') || 'Job posting failed.'
+          Object.values(data).flat().join(' ') ||
+          'Job posting failed.'
         )
       }
 
@@ -140,7 +150,23 @@ function RecruiterDashboard() {
     }
   }
 
-  async function handleStatusChange(applicationId, newStatus) {
+  async function updateApplication(applicationId, changes) {
+    const application = applications.find(
+      item => item.id === applicationId
+    )
+
+    if (!application) return
+
+    const updatedStatus = changes.status ?? application.status ?? 'applied'
+    const updatedRounds = Number(
+      changes.interview_rounds ?? application.interview_rounds ?? 0
+    )
+
+    if (!Number.isInteger(updatedRounds) || updatedRounds < 0) {
+      setApplicationsError('Interview rounds must be a non-negative integer.')
+      return
+    }
+
     setUpdatingId(applicationId)
     setApplicationsError('')
     setStatusMessage('')
@@ -154,37 +180,38 @@ function RecruiterDashboard() {
             'Content-Type': 'application/json',
             Authorization: `Token ${token}`,
           },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({
+            status: updatedStatus,
+            interview_rounds: updatedRounds,
+          }),
         }
       )
 
+      const data = await response.json().catch(() => ({}))
+
       if (!response.ok) {
-        let errorText = 'Could not update application status.'
-
-        try {
-          const data = await response.json()
-          errorText =
-            typeof data === 'object'
-              ? Object.values(data).flat().join(' ')
-              : String(data)
-        } catch {
-          // Keep the fallback error message.
-        }
-
-        throw new Error(errorText)
+        throw new Error(
+          Object.values(data).flat().join(' ') ||
+          'Could not update the application.'
+        )
       }
 
       setApplications(previous =>
-        previous.map(application =>
-          application.id === applicationId
-            ? { ...application, status: newStatus }
-            : application
+        previous.map(item =>
+          item.id === applicationId
+            ? {
+                ...item,
+                status: updatedStatus,
+                interview_rounds: updatedRounds,
+              }
+            : item
         )
       )
 
-      setStatusMessage('Application status updated successfully.')
+      setStatusMessage('Application updated successfully.')
     } catch (err) {
       setApplicationsError(err.message)
+      await loadApplications()
     } finally {
       setUpdatingId(null)
     }
@@ -215,8 +242,8 @@ function RecruiterDashboard() {
         <section className="recruiter-welcome">
           <h1>Recruiter Dashboard</h1>
           <p>
-            Welcome, {user?.username || 'Recruiter'}! Manage your job openings
-            and review candidates here.
+            Welcome, {user?.username || 'Recruiter'}! Manage your job
+            openings and review candidates here.
           </p>
         </section>
 
@@ -309,7 +336,10 @@ function RecruiterDashboard() {
             </button>
           </form>
 
-          {message && <p className="recruiter-success">{message}</p>}
+          {message && (
+            <p className="recruiter-success">{message}</p>
+          )}
+
           {error && (
             <p className="recruiter-error" role="alert">
               {error}
@@ -328,7 +358,10 @@ function RecruiterDashboard() {
 
           <div className="recruiter-job-list">
             {jobs.map(job => (
-              <article className="recruiter-job-card" key={job.id}>
+              <article
+                className="recruiter-job-card"
+                key={job.id}
+              >
                 <h3>{job.title}</h3>
                 <p><strong>Company:</strong> {job.company}</p>
                 <p><strong>Location:</strong> {job.location}</p>
@@ -350,7 +383,7 @@ function RecruiterDashboard() {
 
         <section className="recruiter-panel">
           <h2>Applications Received ({applications.length})</h2>
-          <p>Review candidates who have applied to your job openings.</p>
+          <p>Review candidates and manage their recruitment progress.</p>
 
           {applicationsLoading && <p>Loading applications...</p>}
 
@@ -378,7 +411,9 @@ function RecruiterDashboard() {
                 className="recruiter-job-card"
                 key={application.id}
               >
-                <h3>{application.candidate_name || 'Candidate'}</h3>
+                <h3>
+                  {application.candidate_name || 'Candidate'}
+                </h3>
 
                 <p>
                   <strong>Applied for:</strong>{' '}
@@ -462,10 +497,9 @@ function RecruiterDashboard() {
                     value={application.status || 'applied'}
                     disabled={updatingId === application.id}
                     onChange={event =>
-                      handleStatusChange(
-                        application.id,
-                        event.target.value
-                      )
+                      updateApplication(application.id, {
+                        status: event.target.value,
+                      })
                     }
                   >
                     <option value="applied">Applied</option>
@@ -475,8 +509,48 @@ function RecruiterDashboard() {
                   </select>
                 </label>
 
+                <label>
+                  Interview Rounds Completed
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={application.interview_rounds ?? 0}
+                    disabled={updatingId === application.id}
+                    onChange={event => {
+                      const value = event.target.value
+                      const rounds = value === '' ? '' : Number(value)
+
+                      setApplications(previous =>
+                        previous.map(item =>
+                          item.id === application.id
+                            ? {
+                                ...item,
+                                interview_rounds: rounds,
+                              }
+                            : item
+                        )
+                      )
+                    }}
+                    onBlur={event => {
+                      const rounds = Number(event.target.value)
+
+                      if (
+                        Number.isInteger(rounds) &&
+                        rounds >= 0
+                      ) {
+                        updateApplication(application.id, {
+                          interview_rounds: rounds,
+                        })
+                      } else {
+                        loadApplications()
+                      }
+                    }}
+                  />
+                </label>
+
                 {updatingId === application.id && (
-                  <p>Updating status...</p>
+                  <p>Saving changes...</p>
                 )}
               </article>
             ))}
