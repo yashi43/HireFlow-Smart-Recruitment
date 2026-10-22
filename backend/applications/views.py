@@ -11,7 +11,12 @@ from .serializers import (
 )
 from .permissions import IsCandidate, IsRecruiter
 from jobs.models import Job
-
+from .models import Application, SavedJob
+from .serializers import (
+    ApplicationSerializer,
+    ApplicationStatusSerializer,
+    SavedJobSerializer,
+)
 
 class ApplyJobView(generics.CreateAPIView):
     serializer_class = ApplicationSerializer
@@ -77,3 +82,31 @@ class UpdateApplicationStatusView(generics.UpdateAPIView):
         return Application.objects.filter(
             job__recruiter=self.request.user,
         )
+
+
+
+class SavedJobsView(generics.ListCreateAPIView):
+    serializer_class = SavedJobSerializer
+    permission_classes = [IsCandidate]
+
+    def get_queryset(self):
+        return SavedJob.objects.filter(
+            candidate=self.request.user,
+        ).select_related("job").order_by("-saved_at")
+
+    def perform_create(self, serializer):
+        serializer.save(candidate=self.request.user)
+
+
+
+class SavedJobDeleteView(generics.DestroyAPIView):
+    serializer_class = SavedJobSerializer
+    permission_classes = [IsCandidate]
+
+    def get_object(self):
+        return get_object_or_404(
+            SavedJob,
+            candidate=self.request.user,
+            job_id=self.kwargs["job_id"],
+        )
+

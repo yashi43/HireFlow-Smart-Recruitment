@@ -1,10 +1,10 @@
+
 from django.db import models
 from accounts.models import User
 from jobs.models import Job
 
 
 class Resume(models.Model):
-
     candidate = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -13,7 +13,6 @@ class Resume(models.Model):
 
     resume_file = models.FileField(upload_to='resumes/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-
     extracted_text = models.TextField(blank=True)
 
     def __str__(self):
@@ -21,7 +20,6 @@ class Resume(models.Model):
 
 
 class ResumeMatch(models.Model):
-
     resume = models.ForeignKey(
         Resume,
         on_delete=models.CASCADE,
@@ -35,10 +33,11 @@ class ResumeMatch(models.Model):
     )
 
     match_percentage = models.FloatField(default=0)
-
     matched_skills = models.TextField(blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.resume.candidate.username} - {self.job.title} - {self.match_percentage}%"
+        return (
+            f"{self.resume.candidate.username} - "
+            f"{self.job.title} - {self.match_percentage}%"
+        )

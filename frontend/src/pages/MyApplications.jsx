@@ -1,110 +1,60 @@
-
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import axios from 'axios'
+import { Link, useNavigate } from 'react-router-dom'
+import Navbar from '../components/Navbar'
+import '../styles/MyApplications.css'
 
-const API_URL = 'http://127.0.0.1:8000/api'
+const API = 'http://127.0.0.1:8000/api'
+const statusInfo = {
+  applied: {label:'Application submitted', step:1},
+  screening: {label:'Under review', step:2},
+  shortlisted: {label:'You are shortlisted!', step:3},
+  interview: {label:'Interview in progress', step:4},
+  hired: {label:'Selected', step:5},
+  rejected: {label:'Application not selected', step:0},
+}
+function getUser() { try { return JSON.parse(localStorage.getItem('user')) } catch { return null } }
 
-function MyApplications() {
+export default function MyApplications() {
+  const navigate = useNavigate()
+  const token = localStorage.getItem('token')
+  const user = getUser()
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-
-    axios.get(`${API_URL}/my-applications/`, {
-      headers: { Authorization: `Token ${token}` },
-    })
-      .then((response) => {
-        const data = response.data
+    if (!token) { setError('Please log in to view your applications.'); setLoading(false); return }
+    if (user?.role === 'recruiter') { navigate('/recruiter'); return }
+    fetch(`${API}/my-applications/`, {headers:{Authorization:`Token ${token}`}})
+      .then(async res => {
+        if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? 'Your session may have expired. Please log in again as a candidate.' : `Could not load applications (HTTP ${res.status}).`)
+        const data = await res.json()
         setApplications(Array.isArray(data) ? data : data.results || [])
       })
-      .catch((err) => {
-        setError(
-          err.response?.status === 401 || err.response?.status === 403
-            ? 'Please log in with your candidate account.'
-            : 'Could not load your applications.'
-        )
-      })
+      .catch(e => setError(e.message || 'Could not load applications.'))
       .finally(() => setLoading(false))
   }, [])
 
-  const statusColor = (status) => {
-    const colors = {
-      applied: '#2563eb',
-      shortlisted: '#15803d',
-      rejected: '#dc2626',
-      hired: '#7c3aed',
-    }
-    return colors[status] || '#475569'
-  }
-
-  return (
-    <main style={{ maxWidth: 1000, margin: '40px auto', padding: 20 }}>
-      <Link to="/jobs">← Back to Jobs</Link>
-      <h1>My Applications</h1>
-      <p>Track the jobs you have applied for.</p>
-
-      {loading && <p>Loading applications...</p>}
-      {error && <p role="alert" style={{ color: 'crimson' }}>{error}</p>}
-
-      {!loading && !error && applications.length === 0 && (
-        <section>
-          <h3>No applications yet</h3>
-          <p>Your submitted job applications will appear here.</p>
-          <Link to="/jobs">Explore Jobs</Link>
-        </section>
-      )}
-
-      <div style={{ display: 'grid', gap: 16 }}>
-        {applications.map((application) => (
-          <article
-            key={application.id}
-            style={{
-              padding: 20,
-              border: '1px solid #e2e8f0',
-              borderRadius: 12,
-            }}
-          >
-            <h3>{application.job_title || `Job #${application.job}`}</h3>
-
-            <p>
-              Applied on:{' '}
-              {application.applied_at
-                ? new Date(application.applied_at).toLocaleDateString()
-                : 'Date unavailable'}
-            </p>
-
-            <p>
-              Status:{' '}
-              <strong style={{
-                color: statusColor(application.status),
-                textTransform: 'capitalize',
-              }}>
-                {application.status}
-              </strong>
-            </p>
-
-            {application.resume && (
-              <p>
-                Resume: {typeof application.resume === 'string'
-                  ? application.resume.split('/').pop()
-                  : 'Uploaded'}
-              </p>
-            )}
-
-            {application.cover_letter && (
-              <details>
-                <summary>View cover letter</summary>
-                <p>{application.cover_letter}</p>
-              </details>
-            )}
-          </article>
-        ))}
-      </div>
-    </main>
-  )
+  return <div className="hf-myapps"><Navbar /><main className="hf-myapps-main">
+    <div className="hf-myapps-hero"><div><span className="hf-eyebrow">APPLICATION TRACKING</span><h1>My <em>Applications</em></h1><p>Follow every application and see when your recruitment status changes.</p></div><Link to="/jobs" className="hf-primary-btn">Browse jobs →</Link></div>
+    {error && <div className="hf-alert">{error} {error.includes('log in') && <Link to="/login">Log in</Link>}</div>}
+    {loading && <div className="hf-panel hf-loading">Loading your applications…</div>}
+    {!loading && !error && applications.length === 0 && <section className="hf-panel hf-empty"><div className="hf-empty-icon">▤</div><h2>No applications yet</h2><p>When you apply for a role, your application and its progress will appear here.</p><Link className="hf-primary-btn" to="/jobs">Explore open jobs</Link></section>}
+    <section className="hf-myapps-list">
+      {applications.map(a => {
+        const status = (a.status || 'applied').toLowerCase()
+        const info = statusInfo[status] || statusInfo.applied
+        const title = a.job_title || (typeof a.job === 'object' ? a.job?.title : `Job #${a.job}`)
+        const rounds = Number(a.interview_rounds || 0)
+        return <article className="hf-application-card" key={a.id}>
+          <div className="hf-app-card-top"><div className="hf-job-mark">{(title || 'J').charAt(0).toUpperCase()}</div><div className="hf-app-title"><h2>{title}</h2><p>{a.company || a.company_name || 'Company details'}</p><small>Application #{a.id}{a.applied_at ? ` · Applied ${new Date(a.applied_at).toLocaleDateString()}` : ''}</small></div><span className={`hf-status hf-status-${status}`}>{info.label}</span></div>
+          {status === 'shortlisted' && <div className="hf-shortlist-note">🎉 Congratulations! Your application has been shortlisted. Check this page for interview progress updates.</div>}
+          {status === 'rejected' ? <div className="hf-rejected-note">Thank you for applying. This application is no longer progressing.</div> : <div className="hf-timeline"><div className={`hf-timeline-step ${info.step >= 1 ? 'complete' : ''}`}><span>1</span><small>Applied</small></div><i className={info.step >= 2 ? 'complete' : ''}/><div className={`hf-timeline-step ${info.step >= 2 ? 'complete' : ''}`}><span>2</span><small>Review</small></div><i className={info.step >= 3 ? 'complete' : ''}/><div className={`hf-timeline-step ${info.step >= 3 ? 'complete' : ''}`}><span>3</span><small>Shortlisted</small></div><i className={info.step >= 4 ? 'complete' : ''}/><div className={`hf-timeline-step ${info.step >= 4 ? 'complete' : ''}`}><span>4</span><small>Interview</small></div><i className={info.step >= 5 ? 'complete' : ''}/><div className={`hf-timeline-step ${info.step >= 5 ? 'complete' : ''}`}><span>5</span><small>Decision</small></div></div>}
+          {rounds > 0 && <div className="hf-interview-box"><div><strong>Interview progress</strong><p>{rounds} round{rounds === 1 ? '' : 's'} completed</p></div><div className="hf-round-pills">{Array.from({length:Math.min(rounds,8)},(_,i)=><span className="done" key={i}>Round {i+1} ✓</span>)}</div></div>}
+          {a.resume && <div className="hf-app-extra">Resume: {typeof a.resume === 'string' ? a.resume.split('/').pop() : 'Uploaded'}</div>}
+          {a.cover_letter && <details className="hf-cover"><summary>View cover letter</summary><p>{a.cover_letter}</p></details>}
+        </article>
+      })}
+    </section>
+  </main></div>
 }
-
-export default MyApplications

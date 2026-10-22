@@ -6,6 +6,8 @@ from .views import (
     MyApplicationsView,
     RecruiterApplicationsView,
     UpdateApplicationStatusView,
+    SavedJobsView,
+    SavedJobDeleteView,
 )
 
 urlpatterns = [
@@ -29,4 +31,17 @@ urlpatterns = [
         UpdateApplicationStatusView.as_view(),
         name="update-application-status",
     ),
+
+    
+path(
+    "saved-jobs/",
+    SavedJobsView.as_view(),
+    name="saved-jobs",
+),
+path(
+    "saved-jobs/<int:job_id>/",
+    SavedJobDeleteView.as_view(),
+    name="delete-saved-job",
+),
+
 ]
