@@ -134,6 +134,7 @@ class CandidateApplicationWorkflowTests(TestCase):
         self.assertEqual(my_apps_data[0]['id'], app.id)
         self.assertEqual(my_apps_data[0]['job_title'], 'Full Stack Developer')
         self.assertEqual(my_apps_data[0]['status'], 'applied')
+        self.assertEqual(my_apps_data[0]['interview_rounds'], 0)
 
         # STEP 8, 9, 10 & 11: Recruiter who owns the job sees the application
         self.client.force_authenticate(user=self.recruiter_owner)
@@ -146,6 +147,7 @@ class CandidateApplicationWorkflowTests(TestCase):
         self.assertEqual(recruiter_apps[0]['candidate_name'], 'candidate_workflow')
         self.assertEqual(recruiter_apps[0]['job_title'], 'Full Stack Developer')
         self.assertEqual(recruiter_apps[0]['status'], 'applied')
+        self.assertEqual(recruiter_apps[0]['interview_rounds'], 0)
 
         # STEP 12: Permissions check:
         # a) Unrelated recruiter sees 0 applications
@@ -163,3 +165,54 @@ class CandidateApplicationWorkflowTests(TestCase):
         self.client.force_authenticate(user=self.recruiter_owner)
         recruiter_apply_res = self.client.post(apply_url, data, format='multipart')
         self.assertEqual(recruiter_apply_res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_recruiter_update_status_and_interview_rounds(self):
+        # Create an application
+        app = Application.objects.create(
+            candidate=self.candidate,
+            job=self.job,
+            status=Application.Status.APPLIED,
+            interview_rounds=0,
+        )
+
+        # 1. Recruiter updates status to 'screening' and interview_rounds to 1
+        self.client.force_authenticate(user=self.recruiter_owner)
+        update_url = reverse('update-application-status', kwargs={'pk': app.id})
+        res = self.client.patch(
+            update_url,
+            {'status': 'screening', 'interview_rounds': 1},
+            format='json',
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        app.refresh_from_db()
+        self.assertEqual(app.status, 'screening')
+        self.assertEqual(app.interview_rounds, 1)
+
+        # 2. Recruiter updates to 'interview' and interview_rounds to 2
+        res2 = self.client.patch(
+            update_url,
+            {'status': 'interview', 'interview_rounds': 2},
+            format='json',
+        )
+        self.assertEqual(res2.status_code, status.HTTP_200_OK)
+        app.refresh_from_db()
+        self.assertEqual(app.status, 'interview')
+        self.assertEqual(app.interview_rounds, 2)
+
+        # 3. Unrelated recruiter cannot update (404 Not Found)
+        self.client.force_authenticate(user=self.recruiter_unrelated)
+        res_unrelated = self.client.patch(
+            update_url,
+            {'status': 'rejected'},
+            format='json',
+        )
+        self.assertEqual(res_unrelated.status_code, status.HTTP_404_NOT_FOUND)
+
+        # 4. Candidate cannot update (403 Forbidden)
+        self.client.force_authenticate(user=self.candidate)
+        res_candidate = self.client.patch(
+            update_url,
+            {'status': 'hired'},
+            format='json',
+        )
+        self.assertEqual(res_candidate.status_code, status.HTTP_403_FORBIDDEN)

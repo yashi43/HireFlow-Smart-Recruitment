@@ -31,6 +31,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
             "linkedin_url",
             "github_url",
             "status",
+            "interview_rounds",
             "applied_at",
         ]
 
@@ -41,6 +42,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
             "job",
             "job_title",
             "status",
+            "interview_rounds",
             "applied_at",
         ]
 
@@ -82,11 +84,22 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
 
 class ApplicationStatusSerializer(serializers.ModelSerializer):
+    STATUS_CHOICES = [
+        ("applied", "Applied"),
+        ("screening", "Screening"),
+        ("shortlisted", "Shortlisted"),
+        ("interview", "Interview"),
+        ("rejected", "Rejected"),
+        ("hired", "Hired"),
+    ]
+    status = serializers.ChoiceField(choices=STATUS_CHOICES, required=False)
+    interview_rounds = serializers.IntegerField(min_value=0, required=False)
+
     class Meta:
         model = Application
-        fields = ["status"]
+        fields = ["status", "interview_rounds"]
 
-        
+
 from .models import SavedJob
 
 
@@ -114,4 +127,3 @@ class SavedJobSerializer(serializers.ModelSerializer):
             )
 
         return data
-
