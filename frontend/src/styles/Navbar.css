@@ -1,14 +1,11 @@
-
-/* HIRE FLOW NAVBAR */
-
 .navbar {
   width: 100%;
   min-height: 76px;
-  padding: 12px clamp(20px, 6vw, 100px);
+  padding: 12px clamp(20px, 4vw, 72px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 28px;
+  gap: 32px;
   background: #071a39;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-sizing: border-box;
@@ -51,18 +48,21 @@
   color: #7da7ff;
 }
 
-/* Navigation links */
+/* Navigation Links */
 
 .navbar-links {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(18px, 3vw, 36px);
+  gap: clamp(22px, 2.5vw, 34px);
   flex: 1;
   min-width: 0;
 }
 
 .navbar-links a {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 0;
   color: #dbe5f7;
   font-size: 14px;
   font-weight: 500;
@@ -71,17 +71,18 @@
   transition: color 0.2s ease;
 }
 
-.navbar-links a:hover {
+.navbar-links a:hover,
+.navbar-links a.active {
   color: #80aaff;
 }
 
-/* Login and Sign Up */
+/* Right Side Actions */
 
 .navbar-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 16px;
+  gap: 20px;
   flex-shrink: 0;
 }
 
@@ -94,18 +95,17 @@
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
-  transition: 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .navbar-actions a:hover {
   color: #8bb2ff;
 }
 
-/* Sign Up button */
+/* Sign Up Button */
 
-.navbar-actions a[href="/register"] {
+.navbar-actions .navbar-signup {
   padding: 11px 22px;
-  border: 1px solid transparent;
   border-radius: 9px;
   background: linear-gradient(110deg, #347ff5, #604eec);
   color: #ffffff;
@@ -113,7 +113,7 @@
   box-shadow: 0 5px 16px rgba(66, 100, 255, 0.16);
 }
 
-.navbar-actions a[href="/register"]:hover {
+.navbar-actions .navbar-signup:hover {
   color: #ffffff;
   filter: brightness(1.1);
   transform: translateY(-1px);
@@ -128,9 +128,9 @@
   white-space: nowrap;
 }
 
-/* Logout button */
+/* Logout Button */
 
-.navbar-actions button {
+.navbar-actions .navbar-logout {
   padding: 10px 18px;
   border: 1px solid #455776;
   border-radius: 9px;
@@ -140,20 +140,20 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.navbar-actions button:hover {
+.navbar-actions .navbar-logout:hover {
   background: #142a4e;
   border-color: #7198e9;
 }
 
 /* Tablet */
 
-@media (max-width: 850px) {
+@media (max-width: 1000px) {
   .navbar {
-    padding: 14px 4%;
-    gap: 18px;
+    padding: 12px 24px;
+    gap: 22px;
   }
 
   .navbar-logo {
@@ -166,7 +166,7 @@
   }
 
   .navbar-links {
-    gap: 16px;
+    gap: 18px;
   }
 
   .navbar-links a,
@@ -181,13 +181,14 @@
 
 /* Mobile */
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
   .navbar {
     min-height: 70px;
     height: auto;
     padding: 14px 5%;
     flex-wrap: wrap;
-    row-gap: 15px;
+    column-gap: 12px;
+    row-gap: 14px;
   }
 
   .navbar-logo {
@@ -205,9 +206,13 @@
     flex: 0 0 100%;
     justify-content: flex-start;
     flex-wrap: wrap;
-    gap: 22px;
+    gap: 12px 24px;
     padding-top: 13px;
     border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .navbar-links a {
+    padding: 4px 0;
   }
 
   .navbar-actions {
@@ -215,22 +220,30 @@
     gap: 12px;
   }
 
-  .navbar-actions a[href="/register"] {
+  .navbar-actions .navbar-signup {
     padding: 9px 13px;
   }
 
-  .navbar-actions button {
+  .navbar-actions .navbar-logout {
     padding: 8px 12px;
   }
 }
 
+/* Small Mobile */
+
 @media (max-width: 380px) {
   .navbar {
-    gap: 12px;
+    padding: 12px 4%;
   }
 
   .navbar-logo {
     font-size: 20px;
+    gap: 7px;
+  }
+
+  .navbar-logo::before {
+    width: 32px;
+    height: 32px;
   }
 
   .navbar-actions {
@@ -238,6 +251,6 @@
   }
 
   .navbar-links {
-    gap: 17px;
+    gap: 12px 18px;
   }
 }

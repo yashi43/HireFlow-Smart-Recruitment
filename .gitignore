@@ -5,3 +5,5 @@ __pycache__/
 node_modules/
 .vscode/
 *.sqlite3
+# Uploaded resumes and application documents
+backend/media/

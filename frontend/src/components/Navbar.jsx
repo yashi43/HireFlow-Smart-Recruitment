@@ -12,6 +12,7 @@ function Navbar() {
     try {
       const savedUser = JSON.parse(localStorage.getItem('user'))
       const token = localStorage.getItem('token')
+
       setUser(token && savedUser ? savedUser : null)
     } catch {
       setUser(null)
@@ -40,6 +41,13 @@ function Navbar() {
           <Link to="/jobs">Find Jobs</Link>
         )}
 
+        {user?.role === 'candidate' && (
+          <>
+            <Link to="/my-applications">My Applications</Link>
+            <Link to="/saved-jobs">Saved Jobs</Link>
+          </>
+        )}
+
         {isRecruiter && (
           <Link to="/recruiter">Recruiter Dashboard</Link>
         )}
@@ -51,14 +59,21 @@ function Navbar() {
             <span className="navbar-user">
               Hi, {user.username || 'User'}
             </span>
-            <button type="button" onClick={handleLogout}>
+
+            <button
+              type="button"
+              className="navbar-logout"
+              onClick={handleLogout}
+            >
               Logout
             </button>
           </>
         ) : (
           <>
             <Link to="/login">Login</Link>
-            <Link to="/register">Sign Up</Link>
+            <Link to="/register" className="navbar-signup">
+              Sign Up
+            </Link>
           </>
         )}
       </div>
