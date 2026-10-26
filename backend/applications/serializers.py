@@ -16,6 +16,11 @@ class ApplicationSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
+    company = serializers.CharField(
+        source="job.company",
+        read_only=True,
+    )
+
     class Meta:
         model = Application
 
@@ -25,6 +30,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
             "candidate_name",
             "job",
             "job_title",
+            "company",
             "resume",
             "cover_letter",
             "phone",
@@ -41,6 +47,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
             "candidate_name",
             "job",
             "job_title",
+            "company",
             "status",
             "interview_rounds",
             "applied_at",
